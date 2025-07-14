@@ -17,7 +17,7 @@ final readonly class Transfer extends Transaction
         DateTimeImmutable $date,
     )
     {
-        parent::__construct($comment, $money, $date);
+        parent::__construct($fromAccountId, $money, $date, $comment);
     }
 
     public function fromAccountId(): string

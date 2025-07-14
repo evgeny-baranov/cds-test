@@ -23,10 +23,10 @@ final class Account
 
     public function balance(): Money
     {
-        return $this->balance; // value object is immutable
+        return $this->balance;
     }
 
-    public function apply(Transaction $transaction): void
+    public function execute(Transaction $transaction): void
     {
         $money = $transaction->money();
         match (true) {

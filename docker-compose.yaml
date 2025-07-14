@@ -1,5 +1,6 @@
 services:
   app:
+    tty: true
     build:
       context: .
       dockerfile: Dockerfile
@@ -12,4 +13,5 @@ services:
       - .env
     volumes:
       - .:/app
-    command: php example.php
+
+#    command: php example.php

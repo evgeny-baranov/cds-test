@@ -1,5 +1,3 @@
-# Dockerfile
-
 ARG ARTIFACTORY
 FROM ${ARTIFACTORY}/php:8.2-cli
 
@@ -22,9 +20,11 @@ RUN apt-get update && apt-get install -y \
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-COPY . .
+COPY composer.json composer.lock ./
 
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+
+COPY . .
 
 RUN vendor/bin/phpcs --standard=PSR12 src || true \
  && vendor/bin/phpstan analyse src || true

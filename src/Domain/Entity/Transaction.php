@@ -10,10 +10,17 @@ use DateTimeImmutable;
 abstract readonly class Transaction
 {
     public function __construct(
-        private string            $comment,
+        private string            $account,
         private Money             $money,
         private DateTimeImmutable $date,
-    ) {
+        private string            $comment = ''
+    )
+    {
+    }
+
+    public function account(): string
+    {
+        return $this->account;
     }
 
     public function comment(): string

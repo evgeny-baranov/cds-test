@@ -11,7 +11,7 @@ interface AccountRepositoryInterface
     /** @return Account[] */
     public function all(): array;
 
-    public function find(string $id): ?Account;
+    public function getById(string $id): ?Account;
 
     public function save(Account $account): void;
 }

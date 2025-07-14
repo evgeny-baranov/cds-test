@@ -18,37 +18,37 @@ final readonly class TransactionService
 {
     public function __construct(
         private InMemoryAccountRepository     $accountRepo,
-        private InMemoryTransactionRepository $txnRepo,
+        private InMemoryTransactionRepository $transactionRepository,
     )
     {
     }
 
     /** @return Account[] */
-    public function allAccounts(): array
+    public function getAllAccounts(): array
     {
         return $this->accountRepo->all();
     }
 
-    public function balance(string $accountId): string
+    public function getAccountBalance(string $accountId): string
     {
-        $account = $this->accountRepo->find($accountId);
+        $account = $this->accountRepo->getById($accountId);
         if (!$account) {
             throw new InvalidArgumentException('Account not found');
         }
         return (string)$account->balance();
     }
 
-    public function perform(Transaction $txn): void
+    public function executeTransaction(Transaction $transaction): void
     {
         switch (true) {
-            case $txn instanceof Deposit:
-                $this->applyDeposit($txn);
+            case $transaction instanceof Deposit:
+                $this->applyDeposit($transaction);
                 break;
-            case $txn instanceof Withdrawal:
-                $this->applyWithdrawal($txn);
+            case $transaction instanceof Withdrawal:
+                $this->applyWithdrawal($transaction);
                 break;
-            case $txn instanceof Transfer:
-                $this->applyTransfer($txn);
+            case $transaction instanceof Transfer:
+                $this->applyTransfer($transaction);
                 break;
             default:
                 throw new InvalidArgumentException('Unsupported transaction');
@@ -58,24 +58,23 @@ final readonly class TransactionService
     /** @return Transaction[] */
     public function accountTransactionsSorted(string $accountId, SortStrategyInterface $strategy): array
     {
-        $txns = $this->txnRepo->forAccount($accountId);
-        return $strategy->sort($txns);
+        return $strategy->sort(
+            $this->transactionRepository->forAccount($accountId)
+        );
     }
-
-    // ----- private helpers -------------------------------------------------
 
     private function applyDeposit(Deposit $deposit): void
     {
-        $account = $this->requireAccount($deposit->comment()); // comment stores accountId here for simplicity
-        $account->apply($deposit);
-        $this->txnRepo->add($account->id(), $deposit);
+        $account = $this->requireAccount($deposit->account());
+        $account->execute($deposit);
+        $this->transactionRepository->add($account->id(), $deposit);
     }
 
     private function applyWithdrawal(Withdrawal $withdrawal): void
     {
-        $account = $this->requireAccount($withdrawal->comment());
-        $account->apply($withdrawal);
-        $this->txnRepo->add($account->id(), $withdrawal);
+        $account = $this->requireAccount($withdrawal->account());
+        $account->execute($withdrawal);
+        $this->transactionRepository->add($account->id(), $withdrawal);
     }
 
     private function applyTransfer(Transfer $transfer): void
@@ -83,16 +82,16 @@ final readonly class TransactionService
         $from = $this->requireAccount($transfer->fromAccountId());
         $to = $this->requireAccount($transfer->toAccountId());
 
-        $from->apply($transfer);
-        $to->apply($transfer);
+        $from->execute($transfer);
+        $to->execute($transfer);
 
-        $this->txnRepo->add($from->id(), $transfer);
-        $this->txnRepo->add($to->id(), $transfer);
+        $this->transactionRepository->add($from->id(), $transfer);
+        $this->transactionRepository->add($to->id(), $transfer);
     }
 
     private function requireAccount(string $id): Account
     {
-        $acc = $this->accountRepo->find($id);
+        $acc = $this->accountRepo->getById($id);
         if (!$acc) {
             throw new InvalidArgumentException("Account $id not found");
         }

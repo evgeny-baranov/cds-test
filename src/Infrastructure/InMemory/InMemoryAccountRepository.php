@@ -17,7 +17,7 @@ final class InMemoryAccountRepository implements AccountRepositoryInterface
         return array_values($this->store);
     }
 
-    public function find(string $id): ?Account
+    public function getById(string $id): ?Account
     {
         return $this->store[$id] ?? null;
     }
