@@ -1,0 +1,16 @@
+{
+  "name": "baranov/cds-test",
+  "description": "Demo ",
+  "require": {
+    "php": ">=8.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^1.12",
+    "squizlabs/php_codesniffer": "^3.9"
+  }
+}
